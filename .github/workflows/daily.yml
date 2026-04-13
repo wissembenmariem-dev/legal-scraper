@@ -42,4 +42,5 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           TZ: Europe/Luxembourg
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python main.py

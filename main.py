@@ -74,6 +74,9 @@ def _should_run_now() -> bool:
     """
     if not os.environ.get("GITHUB_ACTIONS"):
         return True
+    # Manual triggers (workflow_dispatch) always run
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        return True
     now_brussels = datetime.now(ZoneInfo("Europe/Brussels"))
     # Accept a ±15 min window around 08:30 to absorb GitHub Actions queueing delays
     in_window = now_brussels.hour == 8 and 15 <= now_brussels.minute <= 45
