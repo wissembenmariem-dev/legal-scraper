@@ -1,0 +1,6 @@
+requests>=2.31,<3
+beautifulsoup4>=4.12,<5
+lxml>=4.9
+python-dotenv>=1.0
+# Optional (Playwright sites — only needed if you enable PLAYWRIGHT_FETCHERS):
+# playwright>=1.40
