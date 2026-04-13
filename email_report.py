@@ -47,7 +47,7 @@ def render_email_html(
         title = html.escape(job.get("title", ""))
         firm = html.escape(job.get("firm", ""))
         loc = html.escape(job.get("location", "") or "Luxembourg")
-        seniority = html.escape(job.get("seniority", ""))
+        seniority = html.escape(job.get("seniority") or "")
         url = html.escape(job.get("url") or "#")
         color = _brand_color(firm)
         return f"""
@@ -65,7 +65,7 @@ def render_email_html(
         title = html.escape(job.get("title", ""))
         firm = html.escape(job.get("firm", ""))
         loc = html.escape(job.get("location", "") or "Luxembourg")
-        seniority = html.escape(job.get("seniority", ""))
+        seniority = html.escape(job.get("seniority") or "")
         url = html.escape(job.get("url") or "#")
         first_seen = _fmt_date(job.get("first_seen"))
         color = _brand_color(firm)
