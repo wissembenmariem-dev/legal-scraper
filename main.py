@@ -79,10 +79,10 @@ def _should_run_now() -> bool:
         return True
     now_brussels = datetime.now(ZoneInfo("Europe/Brussels"))
     # Accept a ±15 min window around 08:30 to absorb GitHub Actions queueing delays
-    in_window = now_brussels.hour == 8 and 15 <= now_brussels.minute <= 45
+    in_window = now_brussels.hour == 8
     if not in_window:
         log.info(
-            "Skipping run: Brussels local time is %s, outside the 08:15–08:45 window.",
+            "Skipping run: Brussels local time is %s, outside the 08:00–08:59 window.",
             now_brussels.strftime("%H:%M %Z"),
         )
     return in_window
