@@ -60,38 +60,7 @@ def run_source(fn, source, errors) -> List[Dict[str, Any]]:
         return []
 
 
-def _should_run_now() -> bool:
-    """Time guard for GitHub Actions dual-cron.
-
-    We schedule two crons (06:30 UTC and 07:30 UTC) because Brussels alternates
-    between CET (UTC+1, winter) and CEST (UTC+2, summer). Only one of these
-    corresponds to 08:30 Brussels on any given day. This guard lets that run
-    proceed and exits early on the other, so the script effectively runs
-    exactly once per day at 08:30 Brussels local time — summer and winter.
-
-    Skipped entirely when not running under GitHub Actions (manual / local
-    invocations always proceed).
-    """
-    if not os.environ.get("GITHUB_ACTIONS"):
-        return True
-    # Manual triggers (workflow_dispatch) always run
-    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
-        return True
-    now_brussels = datetime.now(ZoneInfo("Europe/Brussels"))
-    # Accept a ±15 min window around 08:30 to absorb GitHub Actions queueing delays
-    in_window = now_brussels.hour == 8
-    if not in_window:
-        log.info(
-            "Skipping run: Brussels local time is %s, outside the 08:00–08:59 window.",
-            now_brussels.strftime("%H:%M %Z"),
-        )
-    return in_window
-
-
 def main() -> int:
-    if not _should_run_now():
-        return 0
-
     tz = ZoneInfo(os.environ.get("TZ", "Europe/Luxembourg"))
     today = datetime.now(tz).date().isoformat()
     log.info("=" * 60)
