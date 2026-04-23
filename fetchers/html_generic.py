@@ -329,6 +329,28 @@ def parse_gsk(soup: BeautifulSoup, url: str, firm: str) -> List[Dict[str, Any]]:
     return jobs
 
 
+def parse_ao_shearman(soup: BeautifulSoup, url: str, firm: str) -> List[Dict[str, Any]]:
+    """A&O Shearman uses Radancy. Job links are a.search-results-list__job-link
+    with href /en/job/{city}/{slug}/{ids}. The title is rendered by JS (empty
+    in initial HTML) so we derive it from the slug."""
+    jobs = []
+    for a in soup.select("a.search-results-list__job-link"):
+        href = a.get("href", "")
+        m = re.match(r"^/en/job/([^/]+)/([^/]+)/", href)
+        if not m:
+            continue
+        city = m.group(1).replace("-", " ").title()
+        slug = m.group(2)
+        title = slug.replace("-", " ").strip()
+        # Capitalize first letter; keep rest mixed-case since normalizer lowercases anyway
+        title = title[:1].upper() + title[1:]
+        jobs.append({
+            "firm": firm, "title": title, "location": city,
+            "url": urljoin(url, href), "external_id": None, "source_type": "HTML",
+        })
+    return jobs
+
+
 def parse_generic_fallback(soup: BeautifulSoup, url: str, firm: str) -> List[Dict[str, Any]]:
     """Last-resort: find any anchor that looks like a job link.
 
@@ -381,10 +403,9 @@ PARSERS: Dict[str, Callable[[BeautifulSoup, str, str], List[Dict[str, Any]]]] = 
     "gsk": parse_gsk,
     # Sites below known to require JS — rely on fallback or Playwright later
     "baker_mckenzie": parse_generic_fallback,
-    "dla_piper": parse_generic_fallback,
     "akd": parse_generic_fallback,
     "charles_russell": parse_generic_fallback,
-    "ao_shearman": parse_generic_fallback,
+    "ao_shearman": parse_ao_shearman,
     "hsf_kramer": parse_generic_fallback,
     "simpson_thacher": parse_generic_fallback,
 }

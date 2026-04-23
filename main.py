@@ -28,11 +28,12 @@ from dotenv import load_dotenv
 # Load .env for local runs; GitHub Actions injects env vars directly
 load_dotenv()
 
-from config import WORKDAY_SOURCES, ORACLE_SOURCES, HTML_SOURCES, DECHERT_SOURCES
+from config import WORKDAY_SOURCES, ORACLE_SOURCES, HTML_SOURCES, DECHERT_SOURCES, DLA_PIPER_SOURCES
 from fetchers.workday import fetch_workday
 from fetchers.oracle_hcm import fetch_oracle_hcm
 from fetchers.html_generic import fetch_html
 from fetchers.dechert import fetch_dechert
+from fetchers.dla_piper import fetch_dla_piper
 from normalizer import normalize_and_filter
 from notion_client import NotionClient
 import email_report
@@ -96,6 +97,10 @@ def main() -> int:
     for src in DECHERT_SOURCES:
         raw.extend(run_source(fetch_dechert, src, errors))
 
+    log.info("-- DLA Piper API --")
+    for src in DLA_PIPER_SOURCES:
+        raw.extend(run_source(fetch_dla_piper, src, errors))
+
     log.info("Total raw jobs scraped: %d", len(raw))
 
     # --- 3. Normalize & filter -----------------------------------------
@@ -123,7 +128,7 @@ def main() -> int:
     closed = notion.close_stale(seen_ids, existing, today, grace_days=2)
 
     # --- 5b. Firms with no relevant results today ----------------------
-    all_firms = sorted({s["firm"] for s in WORKDAY_SOURCES + ORACLE_SOURCES + HTML_SOURCES + DECHERT_SOURCES})
+    all_firms = sorted({s["firm"] for s in WORKDAY_SOURCES + ORACLE_SOURCES + HTML_SOURCES + DECHERT_SOURCES + DLA_PIPER_SOURCES})
     firms_with_results = {j["firm"] for j in filtered}
     firms_without_results = sorted(f for f in all_firms if f not in firms_with_results)
 

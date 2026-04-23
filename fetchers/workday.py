@@ -49,10 +49,13 @@ def _parse_workday_posted(raw: Optional[str]) -> Optional[str]:
 
 
 def fetch_workday(source: Dict[str, Any], location_filter: str = "luxembourg") -> List[Dict[str, Any]]:
-    """Fetch all jobs from a Workday tenant, paginating through results.
+    """Fetch Workday jobs matching the location_filter keyword.
 
-    We do NOT server-side filter by location because facet IDs are tenant-specific
-    and brittle. Instead we fetch everything and filter client-side on title/location.
+    We pass searchText=<location_filter> so Workday filters server-side. This
+    catches multi-location jobs like "3 Locations" whose locationsText hides
+    the actual cities — they still come back if Luxembourg is one of them.
+    False positives (Luxembourg mentioned in description only) are filtered
+    out downstream by normalizer.is_luxembourg().
     """
     host = source["host"]
     tenant = source["tenant"]
@@ -78,7 +81,7 @@ def fetch_workday(source: Dict[str, Any], location_filter: str = "luxembourg") -
             "appliedFacets": {},
             "limit": limit,
             "offset": offset,
-            "searchText": "",
+            "searchText": location_filter,
         }
         try:
             r = requests.post(endpoint, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
@@ -109,10 +112,18 @@ def fetch_workday(source: Dict[str, Any], location_filter: str = "luxembourg") -
                 # myworkdaysite URLs usually need the /recruiting/ prefix
                 url = f"{source['search_url'].rstrip('/')}{external_path}" if external_path else source["search_url"]
 
+            # locationsText can be "N Locations" for multi-city jobs — in that case
+            # fall back to the city segment in the externalPath (e.g. /job/Luxembourg/...)
+            loc = (p.get("locationsText") or "").strip()
+            if re.match(r"^\d+\s+Locations?$", loc, re.I):
+                m = re.search(r"/job/([^/]+)/", external_path)
+                if m:
+                    loc = m.group(1).replace("-", " ")
+
             jobs.append({
                 "firm": firm,
                 "title": (p.get("title") or "").strip(),
-                "location": (p.get("locationsText") or p.get("bulletFields", [""])[0] or "").strip(),
+                "location": loc,
                 "url": url,
                 "external_id": p.get("bulletFields", [""])[0] or external_path,
                 "posted_date": _parse_workday_posted(p.get("postedOn")),

@@ -70,8 +70,6 @@ def is_luxembourg(job: Dict[str, Any]) -> bool:
     LU_ONLY_FIRMS = {
         "Elvinger Hoss", "BSP", "Kleyr Grasso", "Luther", "Molitor",
         "Brucher", "Arendt",
-        # URL already filters ?country=Luxembourg — all returned jobs are LU-based
-        "DLA Piper",
     }
     if job.get("firm") in LU_ONLY_FIRMS and not loc:
         return True
@@ -89,6 +87,10 @@ def matches_keywords(job: Dict[str, Any]) -> bool:
     """
     title = _norm(job.get("title", ""))
     if not title:
+        return False
+    # Exclude leading trainee/intern/stagiaire roles (e.g. "Trainee Lawyer ...")
+    # but allow combined roles like "Avocat(e) Stagiaire" where the senior term leads.
+    if re.match(r"^(trainee|intern(?:ship)?|stagiaire|graduate)\b", title):
         return False
     for kw in KEYWORDS:
         kw_n = _norm(kw)

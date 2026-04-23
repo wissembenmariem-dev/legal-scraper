@@ -90,7 +90,7 @@ HTML_SOURCES = [
     {"firm": "Clifford Chance", "url": "https://jobs.cliffordchance.com/jobs?options=203&page=1", "parser": "clifford_chance"},
     {"firm": "GSK Stockmann", "url": "https://career.gsk.de/stellenangebote/?berufsgruppe=17", "parser": "gsk"},
     {"firm": "Baker McKenzie", "url": "https://www.bakermckenzie.com/en/careers/job-opportunities?locations=2b5ec220-0463-4279-b743-e2712d02bcd9", "parser": "baker_mckenzie"},
-    {"firm": "DLA Piper", "url": "https://careers.dlapiper.com/jobs/?country=Luxembourg&sort=by-default", "parser": "dla_piper"},
+    # DLA Piper: scraped via fetchers/dla_piper.py (proprietary JSON API) — not HTML
     {"firm": "AKD", "url": "https://careers.akd.eu/starter-positions", "parser": "akd"},
     {"firm": "Charles Russell Speechlys", "url": "https://www.charlesrussellspeechlys.com/en/careers/current-roles/?Location=L-2180+Luxembourg", "parser": "charles_russell"},
     # Dechert: scraped via fetchers/dechert.py (proprietary JSON API) — not HTML
@@ -104,6 +104,14 @@ DECHERT_SOURCES = [
     {
         "firm": "Dechert",
         "url": "https://www.dechert.com/careers.html",
+    },
+]
+
+# DLA Piper — OpenCms get-jobs.json endpoint, server-side filtered by country
+DLA_PIPER_SOURCES = [
+    {
+        "firm": "DLA Piper",
+        "url": "https://careers.dlapiper.com/jobs/?country=Luxembourg&sort=by-default",
     },
 ]
 
