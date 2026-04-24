@@ -1,12 +1,12 @@
 name: Daily Legal Jobs Scrape
 
-# Runs every morning at ~08:30 Europe/Luxembourg.
-# Luxembourg is UTC+1 in winter, UTC+2 in summer. A single cron at 06:30 UTC
-# gives 08:30 CEST in summer and 07:30 CET in winter — 1h off twice a year
+# Runs every morning at ~08:00 Europe/Luxembourg.
+# Luxembourg is UTC+1 in winter, UTC+2 in summer. A single cron at 06:00 UTC
+# gives 08:00 CEST in summer and 07:00 CET in winter — 1h off twice a year
 # at DST transitions, which is acceptable for a morning digest.
 on:
   schedule:
-    - cron: "30 6 * * *"   # 08:30 CEST (summer) / 07:30 CET (winter)
+    - cron: "0 6 * * *"    # 08:00 CEST (summer) / 07:00 CET (winter)
   workflow_dispatch:       # allow manual trigger from GitHub UI
 
 env:

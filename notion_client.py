@@ -142,6 +142,9 @@ class NotionClient:
             "URL": {"url": job.get("url") or None},
             "Source": {"select": {"name": job["source_type"]}},
         }
+        if was_closed:
+            # Reopened — wipe the stale closure date.
+            props_update["Closed Date"] = {"date": None}
         if job.get("category"):
             props_update["Category"] = {"select": {"name": job["category"]}}
         if job.get("seniority"):
@@ -182,9 +185,12 @@ class NotionClient:
                 self._request(
                     "PATCH",
                     f"/pages/{info['page_id']}",
-                    json={"properties": {"Status": {"select": {"name": "Closed"}}}},
+                    json={"properties": {
+                        "Status": {"select": {"name": "Closed"}},
+                        "Closed Date": {"date": {"start": today_iso}},
+                    }},
                 )
-                closed.append(info | {"external_id": ext_id})
+                closed.append(info | {"external_id": ext_id, "closed_date": today_iso})
                 log.info("  - closed: [%s] %s", info.get("firm"), info.get("title"))
         return closed
 
